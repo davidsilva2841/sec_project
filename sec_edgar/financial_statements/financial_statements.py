@@ -13,6 +13,26 @@ CURRENT_DIRECTORY = str(Path(__file__).resolve().parents[0])
 LOG_FP =  CURRENT_DIRECTORY + '/data/log.json'
 VERBOSE = True
 
+
+def _verify_setup():
+    data_fp = CURRENT_DIRECTORY + '/data/'
+    unzipped_fp = data_fp + '/unzipped_files/'
+    zip_fp = data_fp + '/zip_files/'
+
+    if not os.path.isdir(data_fp): os.mkdir(data_fp)
+    if not os.path.isdir(unzipped_fp): os.mkdir(unzipped_fp)
+    if not os.path.isdir(zip_fp): os.mkdir(zip_fp)
+    if not os.path.isfile(LOG_FP):
+        with open(LOG_FP, 'w+') as file_obj:
+            file_obj.write('''
+                    {
+                        "downloaded_files": []
+                    }
+                '''
+            )
+            file_obj.close()
+
+
 def _get_all_links():
 
     url = 'https://www.sec.gov/dera/data/financial-statement-data-sets.html'
@@ -55,6 +75,7 @@ def _download_links(all_links):
         data_log.append_log(LOG_FP, 'downloaded_files', [file_name])
 
     return zip_files_fp
+
 
 def _unzip_files(unzipped_fp):
 
@@ -121,6 +142,8 @@ def _remove_zip_files(zip_files_fp):
         os.remove(zip_file)
 
 
+
+
 def download(
         dest_path='',
         only_new_files=True,
@@ -141,6 +164,8 @@ def download(
 
     try:
         VERBOSE = verbose
+
+        _verify_setup()
 
         if reset_download_history:
             data_log.reset_history(LOG_FP, 'downloaded_files')
